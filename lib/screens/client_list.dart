@@ -29,7 +29,7 @@ class _ClientListScreenState extends State<ClientListScreen> {
     });
     try {
       final response = await http.get(
-        Uri.parse('http://192.168.0.184/api/testeApi.php/cliente/list'),
+        Uri.parse('http://10.0.2.2/api/testeApi.php/cliente/list'),
       );
       if (response.statusCode == 200) {
         setState(() {
@@ -51,7 +51,7 @@ class _ClientListScreenState extends State<ClientListScreen> {
   Future<void> addClient() async {
     try {
       final response = await http.post(
-        Uri.parse('http://192.168.0.184/api/testeApi.php/cliente'),
+        Uri.parse('https://6907-2804-389-10ee-9832-d8c1-9094-67cc-5e33.ngrok-free.app/api/testeApi.php/cliente'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'nome': nameController.text,
@@ -71,7 +71,7 @@ class _ClientListScreenState extends State<ClientListScreen> {
   Future<void> updateClient() async {
     try {
       final response = await http.put(
-        Uri.parse('http://192.168.0.184/api/testeApi.php/cliente/${idController.text}'),
+        Uri.parse('https://6907-2804-389-10ee-9832-d8c1-9094-67cc-5e33.ngrok-free.app/api/testeApi.php/cliente/${idController.text}'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'nome': nameController.text,
@@ -94,7 +94,7 @@ class _ClientListScreenState extends State<ClientListScreen> {
   Future<void> deleteClient(String id) async {
     try {
       final response = await http.delete(
-        Uri.parse('http://192.168.0.184/api/testeApi.php/cliente/$id'),
+        Uri.parse('https://10.0.2.2/api/testeApi.php/cliente/$id'),
       );
       if (response.statusCode == 200) {
         fetchClients(); // Atualiza a lista
