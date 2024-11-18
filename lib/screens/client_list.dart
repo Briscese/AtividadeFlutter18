@@ -2,19 +2,21 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
+const String baseUrl = 'https://6907-2804-389-10ee-9832-d8c1-9094-67cc-5e33.ngrok-free.app';
+
 class ClientListScreen extends StatefulWidget {
   @override
   _ClientListScreenState createState() => _ClientListScreenState();
 }
 
 class _ClientListScreenState extends State<ClientListScreen> {
-  List clients = []; // Lista de clientes
+  List clients = [];
   final TextEditingController idController = TextEditingController();
   final TextEditingController nameController = TextEditingController();
   final TextEditingController categoryController = TextEditingController();
 
-  bool isLoading = true; // Indica se os dados estão sendo carregados
-  bool isEditing = false; // Indica se está em modo de edição
+  bool isLoading = true;
+  bool isEditing = false;
 
   @override
   void initState() {
@@ -22,14 +24,13 @@ class _ClientListScreenState extends State<ClientListScreen> {
     fetchClients();
   }
 
-  // Fetch: Obter a lista de clientes
   Future<void> fetchClients() async {
     setState(() {
       isLoading = true;
     });
     try {
       final response = await http.get(
-        Uri.parse('http://10.0.2.2/api/testeApi.php/cliente/list'),
+        Uri.parse('$baseUrl/api/testeApi.php/cliente/list'),
       );
       if (response.statusCode == 200) {
         setState(() {
@@ -47,11 +48,10 @@ class _ClientListScreenState extends State<ClientListScreen> {
     }
   }
 
-  // POST: Adicionar cliente
   Future<void> addClient() async {
     try {
       final response = await http.post(
-        Uri.parse('https://6907-2804-389-10ee-9832-d8c1-9094-67cc-5e33.ngrok-free.app/api/testeApi.php/cliente'),
+        Uri.parse('$baseUrl/api/testeApi.php/cliente'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'nome': nameController.text,
@@ -59,19 +59,18 @@ class _ClientListScreenState extends State<ClientListScreen> {
         }),
       );
       if (response.statusCode == 200) {
-        fetchClients(); // Atualiza a lista
-        clearForm(); // Limpa os campos
+        fetchClients();
+        clearForm();
       }
     } catch (e) {
       print('Erro ao adicionar cliente: $e');
     }
   }
 
-  // PUT: Atualizar cliente
   Future<void> updateClient() async {
     try {
       final response = await http.put(
-        Uri.parse('https://6907-2804-389-10ee-9832-d8c1-9094-67cc-5e33.ngrok-free.app/api/testeApi.php/cliente/${idController.text}'),
+        Uri.parse('$baseUrl/api/testeApi.php/cliente/${idController.text}'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'nome': nameController.text,
@@ -79,8 +78,8 @@ class _ClientListScreenState extends State<ClientListScreen> {
         }),
       );
       if (response.statusCode == 200) {
-        fetchClients(); // Atualiza a lista
-        clearForm(); // Limpa os campos
+        fetchClients();
+        clearForm();
         setState(() {
           isEditing = false;
         });
@@ -90,28 +89,25 @@ class _ClientListScreenState extends State<ClientListScreen> {
     }
   }
 
-  // DELETE: Remover cliente
   Future<void> deleteClient(String id) async {
     try {
       final response = await http.delete(
-        Uri.parse('https://10.0.2.2/api/testeApi.php/cliente/$id'),
+        Uri.parse('$baseUrl/api/testeApi.php/cliente/$id'),
       );
       if (response.statusCode == 200) {
-        fetchClients(); // Atualiza a lista
+        fetchClients();
       }
     } catch (e) {
       print('Erro ao excluir cliente: $e');
     }
   }
 
-  // Limpa os campos do formulário
   void clearForm() {
     idController.clear();
     nameController.clear();
     categoryController.clear();
   }
 
-  // Seleciona um cliente para edição
   void selectClient(Map client) {
     setState(() {
       idController.text = client['id'];
@@ -157,43 +153,39 @@ class _ClientListScreenState extends State<ClientListScreen> {
               ],
             ),
             const SizedBox(height: 16),
-            // Lista de Clientes
+            // Lista Vertical de Clientes
             Expanded(
               child: isLoading
                   ? Center(child: CircularProgressIndicator())
-                  : SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: DataTable(
-                  columns: const [
-                    DataColumn(label: Text('ID')),
-                    DataColumn(label: Text('Nome')),
-                    DataColumn(label: Text('Categoria')),
-                    DataColumn(label: Text('Ações')),
-                  ],
-                  rows: clients.map((client) {
-                    return DataRow(
-                      cells: [
-                        DataCell(Text(client['id'])),
-                        DataCell(Text(client['nome'])),
-                        DataCell(Text(client['categoria'])),
-                        DataCell(
-                          Row(
-                            children: [
-                              IconButton(
-                                icon: Icon(Icons.edit, color: Colors.blue),
-                                onPressed: () => selectClient(client),
-                              ),
-                              IconButton(
-                                icon: Icon(Icons.delete, color: Colors.red),
-                                onPressed: () => deleteClient(client['id']),
-                              ),
-                            ],
+                  : ListView.builder(
+                itemCount: clients.length,
+                itemBuilder: (context, index) {
+                  final client = clients[index];
+                  return Card(
+                    elevation: 4,
+                    margin: const EdgeInsets.symmetric(vertical: 8),
+                    child: ListTile(
+                      title: Text(
+                        'ID: ${client['id']} - ${client['nome']}',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      subtitle: Text('Categoria: ${client['categoria']}'),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: Icon(Icons.edit, color: Colors.blue),
+                            onPressed: () => selectClient(client),
                           ),
-                        ),
-                      ],
-                    );
-                  }).toList(),
-                ),
+                          IconButton(
+                            icon: Icon(Icons.delete, color: Colors.red),
+                            onPressed: () => deleteClient(client['id']),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
           ],
